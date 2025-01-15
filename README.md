@@ -53,29 +53,29 @@ Ensure you have the following installed:
 
 2. Install dependencies for the server:
    ```bash
-cd server
-npm install
+   cd server
+   npm install
 
 3. Install dependencies for the client:
    ```bash
-cd ../client
-npm install
+   cd ../client
+   npm install
 
 4. Create a .env file in the server directory:
    ```bash
-PORT=3001
-JWT_SECRET=your_jwt_secret
-MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/mydatabase
+   PORT=3001
+   JWT_SECRET=your_jwt_secret
+   MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/mydatabase
 
 5. Build the client:
    ```bash
-cd ../client
-npm run build
+   cd ../client
+   npm run build
 
 6. Start the server:
    ```bash
-cd ../server
-npm start
+   cd ../server
+   npm start
 
 ### Usage
 
@@ -98,52 +98,6 @@ REST API (Deprecated in favor of GraphQL)
 
 ### GraphQL API
 See GraphQL Queries and Mutations for more details.
-
-### GraphQL Queries and Mutations
-
-1. Queries
-
-Get the current user's details.
-   ```bash
-query GetUser {
-  me {
-    _id
-    username
-    email
-    savedBooks {
-      title
-      authors
-      description
-    }
-  }
-}
-
-
-2. Mutations
-login
-Authenticate a user.
-   ```bash
-mutation Login($email: String!, $password: String!) {
-  login(email: $email, password: $password) {
-    token
-    user {
-      username
-    }
-  }
-}
-
-3. Save a book to the user's library.
-   ```bash
-mutation SaveBook($input: BookInput!) {
-  saveBook(input: $input) {
-    username
-    savedBooks {
-      title
-      authors
-    }
-  }
-}
-
 
 ### Deployment
 The application can be deployed using:
