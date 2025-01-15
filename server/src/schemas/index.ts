@@ -1,5 +1,3 @@
 // index.ts
-import typeDefs from './typeDefs';
-import resolvers from './resolvers';
-
-export { typeDefs, resolvers };
+export { default as typeDefs } from './typeDefs.js';
+export { default as resolvers } from './resolvers.js';

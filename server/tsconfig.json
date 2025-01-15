@@ -1,12 +1,22 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    /* Basic Options */
+    "target": "ES2022", /* Use modern ECMAScript features */
+    "module": "Node16", /* Enable Node.js ES Module syntax */
+    "moduleResolution": "Node16", /* Align module resolution with Node.js 16+ */
+    "esModuleInterop": true, /* Interoperate with CommonJS modules */
+    "resolveJsonModule": true, /* Enable importing JSON files */
+    
+    /* Strict Type-Checking Options */
+    "strict": true, /* Enable all strict type-checking options */
+    
     /* Modules */
-    "rootDir": "src" /* Specify the root folder within your source files. */,
-
+    "rootDir": "src", /* Specify the root folder for source files */
+    
     /* Emit */
-    "outDir": "dist" /* Specify an output folder for all emitted files. */
-    // "noEmitOnError": true /* Disable emitting files if any type checking errors are reported. */
+    "outDir": "dist", /* Specify the output folder for compiled files */
+    "noEmitOnError": true /* Disable emitting files if type-checking errors occur */
   },
   "include": ["src"],
   "typeRoots": ["./node_modules/@types", "./src/types"]

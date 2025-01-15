@@ -1,14 +1,17 @@
 import type { Request, Response } from 'express';
 import express from 'express';
-const router = express.Router();
-
+import userRoutes from './api/user-routes.js';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// import { fileURLToPath } from 'url';
+
+const router = express.Router();
+// import { dirname } from 'path';
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 import apiRoutes from './api/index.js';
 
 router.use('/api', apiRoutes);
+router.use('/users', userRoutes);
 
 // serve up react front-end in production
 router.use((_req: Request, res: Response) => {
