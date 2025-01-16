@@ -1,36 +1,21 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-// Book schema
-const bookSchema = new Schema({
-  bookId: { type: String, required: true },
-  authors: [String],
-  description: String,
-  title: String,
-  image: String,
-  link: String,
-});
+export interface IUser extends Document {
+  username: string;
+  email: string;
+  password: string;
+  isCorrectPassword: (password: string) => Promise<boolean>;
+}
 
-// User schema
-const userSchema = new Schema({
+const userSchema = new Schema<IUser>({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  savedBooks: [bookSchema],
 });
 
-// Pre-save middleware to hash passwords
-userSchema.pre('save', async function (next) {
-  if (this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 10);
-  }
-  next();
-});
-
-// Instance method to validate password
-userSchema.methods.isCorrectPassword = async function (password: string) {
+userSchema.methods.isCorrectPassword = async function (password: string): Promise<boolean> {
   return bcrypt.compare(password, this.password);
 };
 
-const User = model('User', userSchema);
-export default User;
+export default model<IUser>('User', userSchema);

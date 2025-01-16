@@ -1,24 +1,32 @@
 // resolvers.ts
-import User from '../models/User.js';
 import { AuthenticationError } from 'apollo-server-express';
+import User, { IUser } from '../models/User.js';
 import { signToken } from '../services/auth.js';
+
+interface Context {
+  user: { _id: string } | null;
+}
 
 const resolvers = {
   Query: {
-    me: async (_parent: unknown, _args: unknown, context: { user?: { _id: string } }) => {
+    me: async (_: unknown, __: unknown, context: Context): Promise<IUser | null> => {
       if (!context.user) {
         throw new AuthenticationError('Not authenticated');
       }
-      return User.findById(context.user._id).populate('savedBooks');
+      const user = await User.findById(context.user._id) as IUser;
+      return user;
     },
   },
   Mutation: {
-    login: async (_parent: unknown, { email, password }: { email: string; password: string }) => {
-      const user = await User.findOne({ email }).exec();
-      if (!user || !(await (user as any).isCorrectPassword(password))) {
+    login: async (
+      _: unknown,
+      { email, password }: { email: string; password: string }
+    ): Promise<{ token: string; user: IUser | null }> => {
+      const user = await User.findOne({ email }) as IUser;
+      if (!user || !(await user.isCorrectPassword(password))) {
         throw new AuthenticationError('Invalid credentials');
       }
-      const token = signToken(user.username, user.email, user._id.toString());
+      const token = signToken(user.username, user.email, user._id as string);
       return { token, user };
     },
   },
