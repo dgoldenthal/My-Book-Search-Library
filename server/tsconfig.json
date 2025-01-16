@@ -20,8 +20,10 @@
     
     /* Emit */
     "outDir": "dist", /* Specify the output folder for compiled files */
-    "noEmitOnError": true /* Disable emitting files if type-checking errors occur */
+    "noEmitOnError": true, /* Disable emitting files if type-checking errors occur */
+    "types": ["node"]
   },
+
   "include": ["src"],
   "exclude": ["node_modules"]
 }
