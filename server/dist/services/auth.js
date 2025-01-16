@@ -1,22 +1,24 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
-export const authMiddleware = ({ req }) => {
+export const authenticateToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (authHeader) {
         const token = authHeader.split(' ')[1];
-        const secretKey = process.env.JWT_SECRET || 'defaultsecret';
-        try {
-            const user = jwt.verify(token, secretKey);
-            return { user };
-        }
-        catch (err) {
-            console.error('Invalid token:', err);
-        }
+        const secretKey = process.env.JWT_SECRET_KEY || '';
+        jwt.verify(token, secretKey, (err, user) => {
+            if (err) {
+                return res.sendStatus(403); // Forbidden
+            }
+            req.user = user;
+            return next();
+        });
     }
-    return {};
+    else {
+        res.sendStatus(401); // Unauthorized
+    }
 };
 export const signToken = (username, email, _id) => {
     const payload = { username, email, _id };
-    return jwt.sign(payload, process.env.JWT_SECRET || 'defaultsecret', { expiresIn: '2h' });
+    return jwt.sign(payload, process.env.JWT_SECRET_KEY || 'secret', { expiresIn: '2h' });
 };

@@ -1,43 +1,26 @@
 // server.ts
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
-import path from 'path';
 import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
+import { authenticateToken as authMiddleware } from './services/auth.js';
 import { typeDefs, resolvers } from './schemas/index.js';
-import { authMiddleware } from './services/auth.js';
-import routes from './routes/index.js';
 dotenv.config();
-// Initialize Express application
 const app = express();
-const PORT = process.env.PORT || 3001;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-// Middleware for parsing JSON and URL-encoded data
+// Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-// Use API routes
-app.use('/api', routes);
-// Initialize Apollo Server
+app.use(express.urlencoded({ extended: true }));
+app.use(authMiddleware);
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: ({ req }) => authMiddleware({ req }),
+    context: ({ req }) => ({ user: req.user }),
 });
-// Start the server
-const startServer = async () => {
-    await server.start();
-    server.applyMiddleware({ app: app }); // Force compatibility
-    // Serve static assets in production
-    if (process.env.NODE_ENV === 'production') {
-        app.use(express.static(path.join(__dirname, '../client/build')));
-        app.get('*', (_, res) => {
-            res.sendFile(path.join(__dirname, '../client/build/index.html'));
-        });
-    }
+// Apply Apollo middleware
+server.start().then(() => {
+    server.applyMiddleware({ app: app }); // Explicit cast to handle type mismatch
+    const PORT = process.env.PORT || 3001;
     app.listen(PORT, () => {
-        console.log(`🌍 Server running at http://localhost:${PORT}`);
-        console.log(`🚀 GraphQL available at http://localhost:${PORT}${server.graphqlPath}`);
+        console.log(`🌍 Server running on http://localhost:${PORT}`);
+        console.log(`🚀 GraphQL endpoint available at http://localhost:${PORT}${server.graphqlPath}`);
     });
-};
-startServer();
+});
