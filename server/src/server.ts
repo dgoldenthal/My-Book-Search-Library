@@ -3,7 +3,7 @@ import express, { Application } from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import path from 'path';
 import dotenv from 'dotenv';
-
+import { fileURLToPath } from 'url';
 import { typeDefs, resolvers } from './schemas/index.js';
 import { authMiddleware } from './services/auth.js';
 import routes from './routes/index.js';
@@ -13,6 +13,8 @@ dotenv.config();
 // Initialize Express application
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware for parsing JSON and URL-encoded data
 app.use(express.json());
