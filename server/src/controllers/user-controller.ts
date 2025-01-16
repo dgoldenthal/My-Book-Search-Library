@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import User from '../models/User.js';
 import { signToken } from '../services/auth.js';
+import bcrypt from 'bcryptjs';
+
 
 export const loginUser = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
