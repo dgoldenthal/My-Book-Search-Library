@@ -19,7 +19,7 @@
     /* Modules */
     "rootDir": "src", /* Specify the root folder for source files */
     "typeRoots": ["./node_modules/@types", "./src/types"], /* Include type definitions */
-    "types": ["node"], /* Include Node.js type definitions */
+    "types": ["node", "express"], /* Include Node.js type definitions */
     
     /* Emit */
     "outDir": "dist", /* Specify the output folder for compiled files */
