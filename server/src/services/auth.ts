@@ -2,34 +2,32 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
 
-interface JwtPayload {
-  _id: string;
-  username: string;
-  email: string;
-}
+const secret = process.env.JWT_SECRET_KEY || 'mysecretsshhhhh';
+const expiration = '2h';
 
-export const authenticateToken = (req: any, res: any, next: any) => {
-  const authHeader = req.headers.authorization;
+export const authMiddleware = ({ req }: { req: any }) => {
+  // Get token from query or headers
+  let token = req.query.token || req.headers.authorization;
 
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
-
-    const secretKey = process.env.JWT_SECRET_KEY || '';
-
-    jwt.verify(token, secretKey, (err: Error | null, user: JwtPayload | undefined) => {
-      if (err) {
-        return res.sendStatus(403); // Forbidden
-      }
-
-      req.user = user;
-      return next();
-    });
-  } else {
-    res.sendStatus(401); // Unauthorized
+  if (req.headers.authorization) {
+    token = token.split(' ').pop().trim();
   }
+
+  if (!token) {
+    return req;
+  }
+
+  try {
+    const { data } = jwt.verify(token, secret, { maxAge: expiration }) as any;
+    req.user = data;
+  } catch {
+    console.log('Invalid token');
+  }
+
+  return req;
 };
 
-export const signToken = (username: string, email: string, _id: string) => {
+export const signToken = ({ username, email, _id }: { username: string; email: string; _id: string }) => {
   const payload = { username, email, _id };
-  return jwt.sign(payload, process.env.JWT_SECRET_KEY || 'secret', { expiresIn: '2h' });
+  return jwt.sign({ data: payload }, secret, { expiresIn: expiration });
 };
