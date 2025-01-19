@@ -40,9 +40,10 @@ const SignupForm: React.FC = () => {
       });
 
       const { token } = data.addUser;
+      console.log('Signup successful, token received:', token);
       Auth.login(token);
     } catch (err) {
-      console.error(err);
+      console.error('Signup error:', err.message);
       setShowAlert(true);
     }
 

@@ -1,10 +1,13 @@
 import express, { Application } from 'express';
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { ApolloServer } from 'apollo-server-express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { typeDefs, resolvers } from './schemas/index.js';
+
+
 
 dotenv.config();
 
@@ -15,6 +18,11 @@ const __dirname = path.dirname(__filename);
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mydatabase';
+app.use(cors({
+  origin: 'http://localhost:5000', // Replace with your client origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+}));
 
 // Middleware
 app.use(express.json());

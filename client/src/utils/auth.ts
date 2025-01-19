@@ -1,53 +1,66 @@
-// use this to decode a token and get the user's information out of it
 import { jwtDecode } from 'jwt-decode';
 
 interface UserToken {
-  name: string;
-  exp: number;
+  username: string;
+  email: string;
+  _id: string;
+  exp: number; // Expiration time in seconds
 }
 
-// create a new class to instantiate for a user
 class AuthService {
-  // get user data
-  getProfile() {
-    return jwtDecode(this.getToken() || '');
-  }
-
-  // check if user's logged in
-  loggedIn() {
-    // Checks if there is a saved token and it's still valid
+  // Get the user profile from the token
+  getProfile(): UserToken | null {
     const token = this.getToken();
-    return !!token && !this.isTokenExpired(token); // handwaiving here
-  }
+    if (!token) return null;
 
-  // check if token is expired
-  isTokenExpired(token: string) {
     try {
-      const decoded = jwtDecode<UserToken>(token);
-      if (decoded.exp < Date.now() / 1000) {
-        return true;
-      } else return false;
+      return jwtDecode<UserToken>(token);
     } catch (err) {
-      return false;
+      console.error('Error decoding token:', err);
+      return null;
     }
   }
 
-  getToken() {
-    // Retrieves the user token from localStorage
+  // Check if the user is logged in
+  loggedIn(): boolean {
+    const token = this.getToken();
+    return !!token && !this.isTokenExpired(token);
+  }
+
+  // Check if the token is expired
+  isTokenExpired(token: string): boolean {
+    try {
+      const decoded = jwtDecode<UserToken>(token);
+      return decoded.exp < Date.now() / 1000; // Compare expiration with current time
+    } catch (err) {
+      console.error('Error checking token expiration:', err);
+      return true; // Assume expired if decoding fails
+    }
+  }
+
+  // Get the token from localStorage
+  getToken(): string | null {
     return localStorage.getItem('id_token');
   }
 
-  login(idToken: string) {
-    // Saves user token to localStorage
-    localStorage.setItem('id_token', idToken);
-    window.location.assign('/');
+  // Save the token and redirect the user
+  login(idToken: string): void {
+    try {
+      localStorage.setItem('id_token', idToken);
+      window.location.assign('/'); // Redirect to home page after login
+    } catch (err) {
+      console.error('Error during login:', err);
+    }
   }
 
-  logout() {
-    // Clear user token and profile data from localStorage
-    localStorage.removeItem('id_token');
-    // this will reload the page and reset the state of the application
-    window.location.assign('/');
+  // Log out the user
+  logout(): void {
+    try {
+      localStorage.removeItem('id_token'); // Remove token from storage
+      window.location.assign('/'); // Redirect to home page after logout
+    } catch (err) {
+      console.error('Error during logout:', err);
+    }
   }
 }
 

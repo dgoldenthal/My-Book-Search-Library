@@ -1,39 +1,65 @@
-import { IUser } from '../models/User.js';
 interface Context {
     user: {
         _id: string;
+        email: string;
+        username: string;
     } | null;
+}
+interface SaveBookArgs {
+    book: {
+        bookId: string;
+        authors?: string[];
+        description?: string;
+        title: string;
+        image?: string;
+        link?: string;
+    };
+}
+interface RemoveBookArgs {
+    bookId: string;
 }
 declare const resolvers: {
     Query: {
-        me: (_: unknown, __: unknown, context: Context) => Promise<IUser | null>;
-        users: () => Promise<IUser[]>;
-        user: (_: unknown, { username }: {
-            username: string;
-        }) => Promise<IUser | null>;
+        me: (_parent: unknown, _args: unknown, context: Context) => Promise<(import("mongoose").Document<unknown, {}, import("../models/User.js").IUser> & import("../models/User.js").IUser & Required<{
+            _id: string;
+        }> & {
+            __v: number;
+        }) | null>;
     };
     Mutation: {
-        login: (_: unknown, { email, password }: {
+        login: (_parent: unknown, { email, password }: {
             email: string;
             password: string;
         }) => Promise<{
             token: string;
-            user: IUser;
+            user: import("mongoose").Document<unknown, {}, import("../models/User.js").IUser> & import("../models/User.js").IUser & Required<{
+                _id: string;
+            }> & {
+                __v: number;
+            };
         }>;
-        addUser: (_: unknown, args: {
+        addUser: (_parent: unknown, { username, email, password }: {
             username: string;
             email: string;
             password: string;
         }) => Promise<{
             token: string;
-            user: IUser;
+            user: import("mongoose").Document<unknown, {}, import("../models/User.js").IUser> & import("../models/User.js").IUser & Required<{
+                _id: string;
+            }> & {
+                __v: number;
+            };
         }>;
-        saveBook: (_: unknown, { bookInput }: {
-            bookInput: any;
-        }, context: Context) => Promise<IUser | null>;
-        removeBook: (_: unknown, { bookId }: {
-            bookId: string;
-        }, context: Context) => Promise<IUser | null>;
+        saveBook: (_parent: unknown, { book }: SaveBookArgs, context: Context) => Promise<(import("mongoose").Document<unknown, {}, import("../models/User.js").IUser> & import("../models/User.js").IUser & Required<{
+            _id: string;
+        }> & {
+            __v: number;
+        }) | null>;
+        removeBook: (_parent: unknown, { bookId }: RemoveBookArgs, context: Context) => Promise<(import("mongoose").Document<unknown, {}, import("../models/User.js").IUser> & import("../models/User.js").IUser & Required<{
+            _id: string;
+        }> & {
+            __v: number;
+        }) | null>;
     };
 };
 export default resolvers;

@@ -1,12 +1,21 @@
 import { Document } from 'mongoose';
 export interface IUser extends Document {
+    _id: string;
     username: string;
     email: string;
     password: string;
-    isCorrectPassword: (password: string) => Promise<boolean>;
+    savedBooks: Array<{
+        bookId: string;
+        authors?: string[];
+        description?: string;
+        title: string;
+        image?: string;
+        link?: string;
+    }>;
+    isCorrectPassword(password: string): Promise<boolean>;
 }
 declare const _default: import("mongoose").Model<IUser, {}, {}, {}, Document<unknown, {}, IUser> & IUser & Required<{
-    _id: unknown;
+    _id: string;
 }> & {
     __v: number;
 }, any>;
