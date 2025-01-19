@@ -1,26 +1,51 @@
-// server.js
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { ApolloServer } from 'apollo-server-express';
 import dotenv from 'dotenv';
-import { authenticateToken as authMiddleware } from './services/auth.js';
+import mongoose from 'mongoose';
 import { typeDefs, resolvers } from './schemas/index.js';
 dotenv.config();
+// Fix for __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
+const PORT = process.env.PORT || 3001;
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mydatabase';
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(authMiddleware);
-const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context: ({ req }) => ({ user: req.user }),
-});
-// Apply Apollo middleware
-server.start().then(() => {
-    server.applyMiddleware({ app: app }); // Explicit cast to handle type mismatch
-    const PORT = process.env.PORT || 3001;
-    app.listen(PORT, () => {
-        console.log(`🌍 Server running on http://localhost:${PORT}`);
-        console.log(`🚀 GraphQL endpoint available at http://localhost:${PORT}${server.graphqlPath}`);
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+    const clientBuildPath = path.join(__dirname, '../../client/dist');
+    app.use(express.static(clientBuildPath));
+    app.get('*', (_, res) => {
+        res.sendFile(path.join(clientBuildPath, 'index.html'));
     });
-});
+}
+else {
+    app.get('/', (_, res) => {
+        res.send('API running. Switch to production to serve client.');
+    });
+}
+const startApolloServer = async () => {
+    const server = new ApolloServer({
+        typeDefs,
+        resolvers,
+        context: ({ req }) => ({ user: req.user }),
+    });
+    await server.start();
+    server.applyMiddleware({ app: app }); // Cast app as any to resolve type conflict
+    mongoose.connect(MONGO_URI, { dbName: 'mydatabase' });
+    mongoose.connection.once('open', () => {
+        console.log('🌟 Connected to MongoDB');
+        app.listen(PORT, () => {
+            console.log(`🌍 Server running on http://localhost:${PORT}`);
+            console.log(`🚀 GraphQL endpoint available at http://localhost:${PORT}${server.graphqlPath}`);
+        });
+    });
+    mongoose.connection.on('error', (err) => {
+        console.error('Database connection error:', err);
+    });
+};
+startApolloServer();

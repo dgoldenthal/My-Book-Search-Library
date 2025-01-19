@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import User, { IUser } from '../models/User.js';
 import { signToken } from '../services/auth.js';
 
-export const getSingleUser = async (req: Request, res: Response): Promise<Response> => {
+export const getSingleUser = async (req: Request, res: Response): Promise<void> => {
   const { user, params } = req;
   try {
     const foundUser = await User.findOne({
@@ -11,12 +11,15 @@ export const getSingleUser = async (req: Request, res: Response): Promise<Respon
     }).select('-__v -password');
 
     if (!foundUser) {
-      return res.status(400).json({ message: 'Cannot find a user with this id!' });
+       res.status(400).json({ message: 'Cannot find a user with this id!' });
+       return
     }
 
-    return res.json(foundUser);
+     res.json(foundUser);
+     return
   } catch (err) {
-    return res.status(500).json({ error: 'Internal server error' });
+     res.status(500).json({ error: 'Internal server error' });
+     return
   }
 };
 
@@ -38,13 +41,14 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const loginUser = async (req: Request, res: Response): Promise<Response> => {
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   try {
     const user = await User.findOne({ $or: [{ username: email }, { email }] }).exec();
     if (!user || !(await (user as IUser & { _id: string }).isCorrectPassword(password))) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+       res.status(400).json({ message: 'Invalid credentials' });
+       return
     }
 
     const token = signToken({
@@ -52,18 +56,21 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
       email: user.email,
       _id: String(user._id), // Ensure _id is treated as a string
     });
-    return res.json({ token, user });
+     res.json({ token, user });
+     return
   } catch (err) {
-    return res.status(500).json({ error: 'Internal server error' });
+     res.status(500).json({ error: 'Internal server error' });
+     return
   }
 };
 
-export const saveBook = async (req: Request, res: Response): Promise<Response> => {
+export const saveBook = async (req: Request, res: Response): Promise<void> => {
   const { user, body } = req;
 
   try {
     if (!user) {
-      return res.status(400).json({ message: 'User not authenticated!' });
+      res.status(400).json({ message: 'User not authenticated!' });
+      return;
     }
 
     const updatedUser = await User.findOneAndUpdate(
@@ -73,21 +80,23 @@ export const saveBook = async (req: Request, res: Response): Promise<Response> =
     ).select('-__v -password');
 
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found!' });
+      res.status(404).json({ message: 'User not found!' });
+      return;
     }
 
-    return res.json(updatedUser);
+    res.json(updatedUser);
   } catch (err) {
-    return res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-export const deleteBook = async (req: Request, res: Response): Promise<Response> => {
+export const deleteBook = async (req: Request, res: Response): Promise<void> => {
   const { user, params } = req;
 
   try {
     if (!user) {
-      return res.status(400).json({ message: 'User not authenticated!' });
+       res.status(400).json({ message: 'User not authenticated!' });
+       return
     }
 
     const updatedUser = await User.findOneAndUpdate(
@@ -97,11 +106,14 @@ export const deleteBook = async (req: Request, res: Response): Promise<Response>
     ).select('-__v -password');
 
     if (!updatedUser) {
-      return res.status(404).json({ message: "Couldn't find user with this id!" });
+       res.status(404).json({ message: "Couldn't find user with this id!" });
+       return
     }
 
-    return res.json(updatedUser);
+     res.json(updatedUser);
+     return
   } catch (err) {
-    return res.status(500).json({ error: 'Internal server error' });
+     res.status(500).json({ error: 'Internal server error' });
+     return
   }
 };

@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const secret = process.env.JWT_SECRET_KEY || 'mysecretsshhhhh';
+const secret = process.env.JWT_SECRET_KEY || '13271457';
 const expiration = '2h';
 
 export const authMiddleware = ({ req }: { req: any }) => {
