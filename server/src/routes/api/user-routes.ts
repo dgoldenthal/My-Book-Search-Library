@@ -7,7 +7,7 @@ import {
   saveBook,
   deleteBook,
 } from '../../controllers/user-controller.js';
-import { authenticateToken as authMiddleware } from '../services/auth.js';
+import { authMiddleware } from '../../services/auth.js';
 
 const router = Router();
 

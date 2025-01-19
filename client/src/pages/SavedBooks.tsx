@@ -1,25 +1,28 @@
-import React from 'react';
-import { useQuery, useMutation } from '@apollo/client';
-import { GET_ME } from '../utils/queries';
-import { REMOVE_BOOK } from '../utils/mutations';
-import { removeBookId } from '../utils/localStorage';
+import React from "react";
+import { Container, Card, Button, Row, Col } from "react-bootstrap";
+import Auth from "../utils/auth";
+import { removeBookId } from "../utils/localStorage";
+import { useMutation, useQuery } from "@apollo/client";
+import { REMOVE_BOOK } from "../utils/mutations";
+import { GET_ME } from "../utils/queries";
 
-import Auth from '../utils/auth';
-
-function SavedBooks() {
+const SavedBooks: React.FC = () => {
   const { loading, data } = useQuery(GET_ME);
   const [removeBook] = useMutation(REMOVE_BOOK);
+  const userData = data?.me;
 
-  const userData = data?.me || {};
+  const handleDeleteBook = async (bookId: string) => {
+    const token = Auth.loggedIn() ? Auth.getToken() : null;
 
-  const handleDeleteBook = async (bookId) => {
-    if (!Auth.loggedIn()) {
+    if (!token) {
       return false;
     }
 
     try {
-      await removeBook({
-        variables: { bookId },
+      const response = await removeBook({
+        variables: {
+          bookId: bookId,
+        },
         update: (cache) => {
           const { me } = cache.readQuery({ query: GET_ME });
           cache.writeQuery({
@@ -27,12 +30,16 @@ function SavedBooks() {
             data: {
               me: {
                 ...me,
-                savedBooks: me.savedBooks.filter((book) => book.bookId !== bookId),
+                savedBooks: me.savedBooks.filter((book: { bookId: string }) => book.bookId !== bookId),
               },
             },
           });
         },
       });
+
+      if (!response) {
+        throw new Error("Something went wrong!");
+      }
 
       removeBookId(bookId);
     } catch (err) {
@@ -46,21 +53,48 @@ function SavedBooks() {
 
   return (
     <>
-      <div className="text-center">
-        <h1>Viewing {userData.username}'s Saved Books!</h1>
+      <div fluid="true" className="text-light bg-dark p-5">
+        <Container>
+          <h1>Viewing saved books!</h1>
+        </Container>
       </div>
-      <div>
-        {userData.savedBooks.map((book) => (
-          <div key={book.bookId}>
-            <img src={book.image} alt={book.title} />
-            <h3>{book.title}</h3>
-            <p>{book.description}</p>
-            <button onClick={() => handleDeleteBook(book.bookId)}>Remove</button>
-          </div>
-        ))}
-      </div>
+      <Container>
+        <h2 className="pt-5">
+          {userData?.savedBooks.length
+            ? `Viewing ${userData.savedBooks.length} saved ${
+                userData?.savedBooks.length === 1 ? "book" : "books"
+              }:`
+            : "You have no saved books!"}
+        </h2>
+        <Row>
+          {userData?.savedBooks.map((book: any) => (
+            <Col md="4" key={book.bookId}>
+              <Card border="dark">
+                {book.image ? (
+                  <Card.Img
+                    src={book.image}
+                    alt={`The cover for ${book.title}`}
+                    variant="top"
+                  />
+                ) : null}
+                <Card.Body>
+                  <Card.Title>{book.title}</Card.Title>
+                  <p className="small">Authors: {book.authors}</p>
+                  <Card.Text>{book.description}</Card.Text>
+                  <Button
+                    className="btn-block btn-danger"
+                    onClick={() => handleDeleteBook(book.bookId)}
+                  >
+                    Delete this Book!
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Container>
     </>
   );
-}
+};
 
 export default SavedBooks;

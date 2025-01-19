@@ -1,5 +1,5 @@
 // typeDefs.ts
-import { gql } from 'apollo-server-express';
+import { gql } from 'graphql-tag';
 
 const typeDefs = gql`
   type Book {
@@ -35,6 +35,8 @@ const typeDefs = gql`
 
   type Query {
     me: User
+    users: [User!] 
+    user(username: String!): User 
   }
 
   type Mutation {
